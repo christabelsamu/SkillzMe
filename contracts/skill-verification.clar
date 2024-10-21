@@ -25,3 +25,34 @@
 
 (define-data-var skill-counter uint u0)
 (define-data-var badge-counter uint u0)
+
+;; Governance parameters
+(define-map governance-parameters
+    { parameter: (string-ascii 50) }
+    { value: uint }
+)
+
+;; Initialize governance parameters
+(begin
+    (map-set governance-parameters { parameter: "min-validators" } { value: u3 })
+    (map-set governance-parameters { parameter: "approval-threshold" } { value: u70 })
+)
+
+;; Create a new skill type
+(define-public (create-skill (name (string-ascii 64)) (description (string-ascii 256)) (required-votes uint))
+    (let
+        ((skill-id (+ (var-get skill-counter) u1)))
+        (asserts! (is-eq tx-sender contract-owner) (err u403))
+        (map-set skills
+            { skill-id: skill-id }
+            {
+                name: name,
+                description: description,
+                required-votes: required-votes,
+                created-by: tx-sender
+            }
+        )
+        (var-set skill-counter skill-id)
+        (ok skill-id)
+    )
+)
