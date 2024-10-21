@@ -56,3 +56,21 @@
         (ok skill-id)
     )
 )
+
+;; Request skill verification
+(define-public (request-verification (skill-id uint))
+    (let
+        ((verification-status (map-get? skill-verifications { skill-id: skill-id, user: tx-sender })))
+        (asserts! (is-none verification-status) (err u401))
+        (map-set skill-verifications
+            { skill-id: skill-id, user: tx-sender }
+            {
+                status: "pending",
+                votes: u0,
+                validators: (list),
+                badge-id: none
+            }
+        )
+        (ok true)
+    )
+)
